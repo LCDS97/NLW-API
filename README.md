@@ -13,7 +13,7 @@
 ## Sobre o projeto
 
 <hr>
-## :pencil: <h2> Conceitos aprendidos </h2> <a name="concepts"></a>
+<h2>:pencil: Conceitos aprendidos </h2> <a name="concepts"></a>
 <details>
 <summary> Aula 1</summary>
 Utilizaremos o yarn como a biblioteca de dependências para o projeto
