@@ -15,7 +15,9 @@
 <hr>
 <h2>:pencil: Conceitos aprendidos </h2> <a name="concepts"></a>
 <details>
-<summary> Aula 1</summary>
+<summary> Dia 1 - Liftoff</summary>
+
+## Aula 1 - Introdução do Projeto
 Utilizaremos o yarn como a biblioteca de dependências para o projeto
 
 > Dependências
@@ -67,8 +69,9 @@ Também utilizando o beekeeper studio para o SQL
 </details>
 
 <details>
-<summary> Aula 2</summary>
+<summary>Dia 2 - Maximum Speed</summary>
 
+## Aula 2 - TypeORM
 > Banco de Dados
 <details>
 
@@ -148,7 +151,7 @@ CLI é uma ferramenta que pode ser utilizada no terminal de uma forma global na 
 ```json
 "typeorm": "ts-node-dev ./node_modules/typeorm/cli.js"
 ```
-#### Cheatsheet
+#### Cheatsheet-Migrations
 <details>
 <summary>Expandir</summary>
 Para criar uma migration:
@@ -264,6 +267,114 @@ Para não poluir nosso services e definir as rotas da aplicação é criado um a
 > Para habilitar o express aceitar json em suas entradas, é necessário utilizar o app.use(express.json())
 
 > Código da Aula 2 #unidade
+
+</details>
+
+<details>
+<summary> Dia 3 - In Orbit</summary>
+
+## Aula 3 - Tratativas e Middlewares
+Nessa aula, iremos tratar a excessão e como utilizar os tratamentos e estruturas das tags e por fim conhecer o conceito de middleware na aplicação
+
+> Para tratativas de erro HTTP, utilizar o http.cat como guia!
+
+### Tratativas de erro
+Ao lançar a excessão que para a camada de controller, temos que fazer a tratativa pelo controller, existem duas formas para fazer a tratativa:
+
+- Pelo método try e catch, ou seja, tente fazer algo se não conseguir cai no catch e recebo o erro
+- Pelo método de tratar no server, com um middleware das rotas
+
+Com try e catch fica muito massante para aplicações largas, então a melhor forma é tratar na camada, ao invés de tratar no controller, fazer a tratativa no server com um middleware
+
+<pre>
+- Controller -> Service (throw new Error)
+Iremos tratar com um middleware para tratativas que ocorrerão no server
+- server(middleware) -> controller -> ...
+</pre>
+
+### Middleware
+
+Middlewares são interceptadores que usamos dentro de uma requisição tanto como **interromper** ou como **adicionar uma informação** dentro do middleware, seria algo no meio entre a requisição e a resposta
+
+> O papel do middleware é pegar as respostas das rotas e fazer uma tratativas verificando se há algum erro na rota
+
+#### Cheatsheet-Middlewares
+<details>
+<summary>Expandir</summary>
+
+- Middleware de erro possui 4 paramêtros, do tipo err, request, response e next
+```js
+ ((err: Error, request: Request, response: Response, next: NextFunction)
+```
+
+Temos que verificar qual a instância do erro:
+
+Pode ser que ele seja um erro não tratável que não é tratado pela aplicação, ou erro de servidor como 500
+
+Por padrão do express, ele não consegue capturar os erros de requisição aonde se utiliza o async, ele não consegue capturar os erros que estão vindos (erros assíncronos), ou seja é necessário utilizar uma biblioteca para tratar esses erros
+
+- yarn add express-async-errors
+
+E importar no server.ts que ele ja ira conseguir tratar de lidar com esses erros
+
+Tratando dessa forma é sempre uma regra o middleware ser utilizado depois da rota chamada, pois ele necessita tratar a resposta depois que ela é enviada ao service for chamado
+
+</details>
+
+### Criar estrutura - tags
+
+Iremos criar uma nova migration para as tags, com o nome de CreateTags
+
+Irá conter colunas de ID, name, created_at, updated_at
+
+Agora iremos aplicar as regras de negócio, criaremos uma entidade chamada Tag com as suas columnas e entidades, e também criar um TagsRepositories onde ira extenders as funções de repositório do TypeORM
+e também um CreateTagService
+
+> Quando precisa só referenciar somente um valor na interface pode ser executado direto no parametro do execute
+```js
+class exemploService {
+    async execute(valor: tipo)
+}
+```
+
+Dentro do service iremos tratar alguns erros em questão de verificar se o nome é invalido/incorreto, se a tag ja existe
+
+O conceito do find One do repositories é como exatamente o comando de SQL
+SQL:
+<pre>
+SELECT * FROM EXAMPLE WHERE NAME = "name"
+</pre>
+TypeORM:
+<pre>
+const valueAlreadyExists = await exampleRepositories.findOne({ name })
+</pre>
+
+Criado também o controller da Tag para tratar request e response e pegar o body name da tag pelo request, e depois do controller criado nós referenciamos ele em nossa rota no route.ts, criando uma rota post e aplicando o handle do controller
+
+Depois a validação vai estar confirmando no banco se ja existe a tag ou se o nome está incorreto/nulo, agora iremos cadastrar a parte onde não é permitido o cadastro de tags por usuários que não sejam administradores
+
+Para verificar é necessário ter na rota dos tags para cadastrar a tag, uma validação para verificar se o usuário que faz a requisição se é administrador ou não
+
+Iremos criar uma pasta de middleware para cadastro de todos essas verificações
+
+É criado o arquivo ensureAdmin para verificar se o usuário que esta fazendo a requisição é admin, como é um middleware de erro sempre é necessário importar os três parametros que são: *Request, Response, NextFunction*
+
+Como no momento do projeto ainda não foi implementado o JWT, iremos controlar a variavel do admin, para true
+
+Para verificar de se o usuário é admin é aplicado o next, caso não seja é retornado o http status 401 de Unauthorized
+
+Algo bacana para utilizar no projeto deixar o status Code global o usuário ja consegue identificar melhor o que realmente está acontecendo para receber aquele status code
+
+Depois usaremos o middleware para nossa rota, no routes.ts
+
+Não se utiliza o router.use no middleware pois se for usado todas as rotas serão obrigados a passar por aquele middleware, ou seja, por exemplo uma rota de cadastro que não existe o usuário não faz sentido ele ter uma verificação de admin, nesse caso de middleware nós especificamos ele entre o caminho da rota e o controller dele;
+Você pode colocar quantos middlewares que achar necessário para executar
+```js
+router.post("/router", exampleMiddleware, exampleMiddleware2, exampleController)
+```
+
+
+> Código da aula 3 - embuscadeevolucao
 
 </details>
 
