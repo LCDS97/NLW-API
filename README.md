@@ -711,5 +711,202 @@ interface IPayload{
 ```
 Iremos recuperar a informação do id do admin, colocando dentro do ensureAdmin a destruturação do user_id e verificamos que no console ele ja mostra o id do usuario depois que acessar o middleware de admin
 
+Para verificação do admin, iremos importar o nosso repositories de Users (UsersRepositories) e criar uma função de find.one com o user_id obtido do request, destruturando o admin e assim podemos remover a constante de teste admin igual à true.
+A função do ensureAuthenticate ira ficar assim:
+```js
+export async function ensureAdmin(request: Request, response: Response, next: NextFunction){
+    const {user_id } = request;
+
+    const usersRepositories = getCustomRepository(UsersRepositories);
+
+    const { admin } = await usersRepositories.findOne(user_id)
+
+
+    if(admin){
+        return next();
+    }
+
+    return response.status(401).json({
+        error: "Unauthorized"
+    });
+}
+```
+Ja concluimos a parte de autenticação  e verificar se o usuario é valido, assim como a validação do ADM
+
+### User sender - Correção
+
+Agora iremos arrumar o user_sender para poder ele receber o usuário que esta enviando do request.user_id e não do request.body para não ocorrer o erro de SQL Lint, por causa da FK
+Agora iremos colocar a destrutuaração do request pegando o user_id da request, e const compliment na função de create, o user_sender ira receber o user_id
+```js
+class CreateComplimentController {
+    async handle(request: Request, response: Response){
+        const { tag_id, user_receiver, message } = request.body;
+        const {user_id } = request;
+
+        const createComplimentService = new CreateComplimentService();
+
+        const compliment = await createComplimentService.execute({
+            tag_id, user_sender: user_id, user_receiver, message
+        });
+
+        return response.json(compliment);
+    }
+}
+```
+Pegando dessa forma, o usuário é obrigado a fazer autenticação para poder conseguir fazer o envio do compliment, pois o user_sender não é mais manipulavel
+
+Concluímos o projeto da nossa aplicação, as etapas que foram concluídas:
+
+- Cadastro de tags somente com admin;
+- Garantir que o usuário esta autenticado com JWT;
+- Cadastro de usuários
+- Cadastro de elogios
+
+### List Compliments by User
+Mas iremos implementar um algo mais no projeto, iremos criar uma listagem de elogios enviados e recebidos do usuário logado
+Primeiramente iremos criar um service com o nome do ListUserReceiveComplimentsService.ts e ListUserSendComplimentsService.ts
+
+Vamos trabalhar no arquivo do ListUserSend, iremos criar uma classe chamando o customRepositories do compliments e fazer um método de find para achar todos os user_send de acordo com o user_id da request(Usuário Logado) e ele ira retorna os compliments que enviou
+```js
+import { getCustomRepository } from "typeorm";
+import { ComplimentsRepositories } from "../repositories/ComplimentsRepositories";
+
+
+class ListUserSendComplimentsService {
+
+    async execute(user_id: string){
+        const complimentsRepositories = getCustomRepository(ComplimentsRepositories);
+
+        const compliments = await complimentsRepositories.find({
+            where: {
+                user_sender: user_id
+            }
+        })
+
+        return compliments;
+    }
+
+
+}
+
+export {ListUserSendComplimentsService}
+```
+O user receive é a mesma estrutura, mas as unicas coisas que mudam seria em relação 
+a receber as variaveis de user_send
+
+Iremos agora criar os controllers do Receive e Send com os nomes:
+- ListUserSendComplimentsController.ts
+- ListUserReceiveComplimentsController.ts
+
+No controller iremos criar um handle para recuperar o user_id do request e passar ele para o execute e fazer o return dele
+```js
+import { Request, Response } from "express";
+import { ListUserSendComplimentsService } from "../services/ListUserSendComplimentsService";
+
+class ListUserSendComplimentsController {
+    async handle(request: Request, response: Response){
+        const { user_id } = request;
+        const listUserSendComplimentsService = new ListUserSendComplimentsService();
+
+        const compliments = await listUserSendComplimentsService.execute(user_id);
+
+        return response.json(compliments);
+    }
+}
+
+export { ListUserSendComplimentsController }
+```
+
+Mesma estrutura para o receiver, mas no caso só ira necessitar mudar o nome da classe, o import do service e sua utilização no await execute
+
+E depois iremos por fim definir suas rotas em relação para fazer o método get tanto do sender e do receiver, importando seus controllers e definindo uma rota para cada um, e colocando o middleware de ensureAuthenticate para conseguir retornar os valores, pois como definimos na aplicação ele resgata o user_id através do request
+```js
+const listUserSendComplimentsController = new ListUserSendComplimentsController();
+const listUserReceiveComplimentsController = new ListUserReceiveComplimentsController();
+...
+...
+router.get("/users/compliments/send", ensureAuthenticated,listUserSendComplimentsController.handle)
+router.get("/users/compliments/receive", ensureAuthenticated,listUserReceiveComplimentsController.handle)
+```
+
+e também iremos recuperar o relacionamentos da tabela que iremos pegar mudando no service, definindo umas opções relations
+
+```js
+    async execute(user_id: string){
+        const complimentsRepositories = getCustomRepository(ComplimentsRepositories);
+
+        const compliments = await complimentsRepositories.find({
+            where: {
+                user_receiver: user_id
+            },
+            relations: ["userSender", "userReceiver", "tag"]
+        })
+
+        return compliments;
+    }
+```
+
+### List Exists Tags - Service
+
+Iremos fazer também um get de todas as tags que ira ter disponivel para o usuário, primeiro iremos criar um service com o nome de ListTagsServices.ts
+Ele ira possuir uma estrutura básica simplesmente listando suas tags existentes com o .find do tagsRepositories
+```js
+import { getCustomRepository } from "typeorm";
+import { TagsRepositories } from "../repositories/TagsRepositories";
+
+
+class ListTagsService {
+    async execute(){
+        const tagsRepositories = getCustomRepository(TagsRepositories);
+
+        const tags = await tagsRepositories.find();
+
+        return tags;
+
+    }
+}
+
+export { ListTagsService }
+```
+Agora iremos criar um controller para poder manipular a questão do handle do get e assim retornamos as tags que o usuário ira ter disponivel na aplicação, a estrutura do controller, é somente usar o execute para retornar as tags existentes em json
+```js
+import { Request, Response} from "express";
+import { ListTagsService } from "../services/ListTagsService";
+
+class ListTagsController{
+    async handle(request: Request, response: Response){
+        const listTagsService = new ListTagsService();
+
+        const tags = await listTagsService.execute();
+
+        return response.json(tags);
+        
+    }
+    
+}
+
+export {ListTagsController}
+```
+E por fim criar uma rota get para as tags garantido que somente quem está autenticado ira utilizar essa rota, no caso usando o middleware de autenticação, e depois o controller.handle do ListTags
+```js
+const listTagsController = new ListTagsController();
+...
+...
+router.get("/tags", ensureAuthenticated, listTagsController.handle); 
+```
+
+Caso a gente queira fazer uma costumização para personalizar as tags como inserir um # por exemplo, poderemos no ListTagsServices fazer um map do retorno .find do tagsRepositories afim de concatenar eles e colocar um name custom o # e o tag name e mudar para let afim de sobrescrever o que vem do banco
+
+```js
+        const tags = await tagsRepositories.find();
+        tags.map(tag => (
+            { ...tag, nameCustom: `#${tag.name}` }
+            ))
+
+        return tags;
+```
+
+Mas também existe uma biblioteca que tem a principal funcionalidade de personalizar entities da nossa aplicação, porque o RM
+
 </details>
 
