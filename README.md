@@ -1,4 +1,4 @@
-# NLW-API
+details# NLW-API
 
 ## Sumário:
 - [Sobre](#about)
@@ -28,6 +28,26 @@
 
 </pre>
 ## Sobre o projeto
+### Regras de Negócios
+
+<details>
+<summary>Expandir</summary>
+### NLW VALORIZA
+
+- Cadastro de usuário
+- [ x ] Não é permitido cadastrar mais de um usuário com o mesmo e-mail 
+- [ x ] Não é permitido cadastrar usuário sem e-mail 
+
+- Cadastro de Tag
+- [ x ] Não é permitido cadastrar mais de uma tag com o mesmo nome
+- [ x ] Não é permitido cadastrar tag sem nome
+- [ x ] Não é permitido cadastrar por usuários que não sejam administradores
+
+- Cadastro de elogios
+- [ ] Não é permitido um usuário cadastrar um elogio para si
+- [ ] Não é permitido cadastrar elogios para usuários invalidos
+- [ ] O usuário precisa estar autenticado na aplicação
+</details>
 
 <hr>
 <h2>:pencil: Conceitos aprendidos </h2> <a name="concepts"></a>
@@ -214,26 +234,6 @@ O fluxo dele é da seguinte forma:
 É a parte da aplicação onde faz todo tratamento e processamento das validações das regras de négocios, é a camada de serviço responsável para validação antes que a requisição seja enviada para o banco de Dados ou tratativa de retorno para o cliente
 
 Toda aplicação tem suas regras de negócios, casos de usos, regras funcionais e não funcionais
-
-<details>
-<summary> NLW-Valoriza - Regras de Negócios Exemplo</summary>
-### NLW VALORIZA
-
-- Cadastro de usuário
-- [ ] Não é permitido cadastrar mais de um usuário com o mesmo e-mail 
-- [ ] Não é permitido cadastrar usuário sem e-mail 
-
-- Cadastro de Tag
-- [ ] Não é permitido cadastrar mais de uma tag com o mesmo nome
-- [ ] Não é permitido cadastrar tag sem nome
-- [ ] Não é permitido cadastrar por usuários que não sejam administradores
-
-- Cadastro de elogios
-- [ ] Não é permitido um usuário cadastrar um elogio para si
-- [ ] Não é permitido cadastrar elogios para usuários invalidos
-- [ ] O usuário precisa estar autenticado na aplicação
-
-</details>
 
 Conceito de código limpo - como SOLID para aplicar em projetos
 
@@ -488,6 +488,163 @@ Crie uma rota no postman com a rota colocada e teste enviando um body JSON com e
 Agora iremos criar a migration da Compliments
 ```js
 yarn typeorm migration:create -n CreateCompliments 
+```
+Iremos criar a estrutura do projeto na Migrations do CreateCompliments, e eles iremos agora implementar o relacionamento de tabelas, ou seja, Foreign Key
+
+Quando falamos relacionamentos de tabelas, precisamos ter um campo, mas não basta ter somente ele, mas sim precisa sabe da aonde ele está vindo, ou seja, de qual tabela esta sendo referenciado esse valor
+
+Para criar uma foreign key, existem duas formas para criar ela:
+
+- Pode ser criado depois do new Table, pode definir uma das opções que permite criar um array e dentro dele criar as FK, nesse array são definidos algumas propriedades como:
+
+```js
+{
+    name: "nomeDaForeignKey",
+    referencedTableName: "tabelaDeOrigem",
+    referencedColumnNames: ["colunaDeOrigem"],
+    columnNames: ["colunaQueVaiConterValorOrigem"]
+    onDelete: "quandoDeletarRemover", // Pode setar como nulo ou outras ações
+    onUpdate: "quandoAtualizarAcao"
+}
+```
+
+- Pode ser criado com uma função async utilizando o query runner com CreateForeignKey depois da função createTable
+
+```js
+await queryRunner.createForeignKey(
+    "tabelaAtual",
+    new TableForeignKey({
+    name: "nomeDaForeignKey",
+        referencedTableName: "tabelaDeOrigem",
+        referencedColumnNames: ["colunaDeOrigem"],
+        columnNames: ["colunaQueVaiConterValorOrigem"]
+        onDelete: "quandoDeletarRemover", // Pode setar como nulo ou outras ações
+        onUpdate: "quandoAtualizarAcao"
+    })
+)
+```
+
+Foi criado no projeto três FK com os nomes FKUserSenderCompliments e FKUserReceiverCompliments, referenciado a coluna id da tabela users para a colunas do user_sender e user_receiver e com os onDelete e onUpdate nulos, e a FKTagsCompliments , referenciado a coluna id da tabela tags para a colunas do tag_id e com os onDelete e onUpdate nulo
+
+```js
+                foreignKeys:[
+                    {
+                        name: "FKUserSenderCompliments",
+                        referencedTableName: "users",
+                        referencedColumnNames: ["id"],
+                        columnNames:["user_sender"],
+                        onDelete: "SET NULL",
+                        onUpdate: "SET NULL"
+                    },
+                    {
+                        name: "FKUserSenderCompliments",
+                        referencedTableName: "users",
+                        referencedColumnNames: ["id"],
+                        columnNames:["user_sender"],
+                        onDelete: "SET NULL",
+                        onUpdate: "SET NULL"
+                    },
+                    {
+                        name: "FKUserTagCompliments",
+                        referencedTableName: "tags",
+                        referencedColumnNames: ["id"],
+                        columnNames:["tag_id"],
+                        onDelete: "SET NULL",
+                        onUpdate: "SET NULL"
+                    }
+                ]
+```
+E um query Runner Drop Table Compliments, e após usar um migration:run para criar a tabela de compliments.
+
+### Entities Compliments
+
+Iremos agora criar a entidade de Compliment.ts, com as mesmas propriedades do entities de Tag e User
+
+Diferente das outras tabelas, essa tabela possui relacionamentos e no caso é necessário referenciar as foreign key da entities para o banco, para referenciar utiliza o JoinColumn() e passa que o valor de baixo represente seu paramêtro, e seu tipo de relacionamento com @TipoRelacionamento
+```js
+@JoinColumn({name: "valorReferenciado"})
+@ManyToOne(() => Example) // Qual tipo de relacionamento ira ser, nesse caso estou dizendo n:1
+example: Example;
+```
+> Existem 4 tipos de relacionamentos de tabelas:
+>> Um para Um - 1:1
+>> Um para Muitos - 1:n
+>> Muitos para Um - n:1
+>> Muitos para Muitos - n:n
+
+No projeto foi criado os relacionamentos das colunas user_receiver, user_sender e tag_id
+```js
+    @Column()
+    user_sender: string;
+
+    @JoinColumn({name: "user_sender"})
+    @ManyToOne(() => User)
+    userSender: User;
+
+    @Column()
+    user_receiver: string;
+
+    @JoinColumn({name: "user_receiver"})
+    @ManyToOne(() => User)
+    userReceiver: User;
+```
+
+### Repositories Compliments
+
+Iremos agora criar o repositório do Compliments, com o mesmo padrão mas só mudando o @EntityRepository para a tabela Compliment, com o class de ComplimentsRepositories e estendendo do Repositório da Classe Compliment e exportar ele
+
+### Service Compliments
+
+Seguindo a mesma estrutura dos outros services, mas implementando uma interface aonde você ira conter os valores de tag_id, user_sender, user_receiver e message, e fazendo a destruturação na função async execute, contendo o repositórios do complimentsRepositories e usersRepositories
+
+Para tratar sobre cadastrar elogios para usuarios inválidos e usuário precisa estar autenticado na aplicação, só com autenticação ja conseguimos cumprir essas duas regras, e depois usaremos o middleware de autenticação para validar essas duas regras.
+
+Verificamos também se o usuário que esta enviando o elogio se não é ele mesmo e iremos verificar se o usuário se o user_receiver é um usuário valido, como o user_receiver é o id do usuário, por padrão o findOne ele busca sempre o valor id então nesse caso pode ser o paramêtro nessa rota.
+```js
+if(idExemploSender === idExemploReceiver)
+
+async execute({idExemplo}: IExampleRequest){
+    const examplesRepositories = getCustomRepository(ExampleRepositories);
+    const idExemploExists = await exampleRepositories.findOne(idExemplo);
+}
+```
+
+E depois de tudo certo pode se criar a função de complimentsRepositories.create passando os valores do tag_id, user_receiver, user_sender e message e após criar, salvar com o complimentsRepositories.save passando o const do compliment e retornando ele.
+```js
+const example = exampleRepositories.create({
+    valorExample
+});
+await exampleRepositories.save(example);
+return example;
+```
+
+### Controller Compliments
+
+Agora iremos criar o handle do Compliments, como no momento precisamos fazer algumas alterações para aula 5, no momento iremos receber a informação do request body, e na próxima aula iremos refatorar
+Os valore são os tag_id, user_sender, user_receiver, message dentro do execute
+```js
+class CreateComplimentController {
+    async handle(request: Request, response: Response){
+        const { tag_id, user_sender, user_receiver, message } = request.body;
+
+        const createComplimentService = new CreateComplimentService();
+
+        const compliment = await createComplimentService.execute({
+            tag_id, user_sender, user_receiver, message
+        });
+
+        return response.json(compliment);
+    }
+}
+```
+E nos routes.ts criar uma rota "/compliments", e o caminho do controller.handle dele
+
+No momento ao testar aplicação o user_sender ira ser tratado com autenticação, ja os outros campos estão validos, verificar também do tag_id(não sei se é necessário)
+
+Iremos definir o default admin para false quando for criar um usuário.
+Para fazer isso no typescript, no camada de service (CreateUserService.ts), nos parametros do execute você atribui um valor do admin para false que ira automaticamente atribuir um valor default, caso esse paramêtro não seja preenchido
+```js
+async execute({nome, email, admin = false, password})...
 ```
 
 
