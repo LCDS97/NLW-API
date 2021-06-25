@@ -14,6 +14,7 @@
 
 <hr>
 <h2>:pencil: Conceitos aprendidos </h2> <a name="concepts"></a>
+
 <details>
 <summary> Dia 1 - Liftoff</summary>
 
@@ -73,6 +74,7 @@ Também utilizando o beekeeper studio para o SQL
 
 ## Aula 2 - TypeORM
 > Banco de Dados
+
 <details>
 
 <summary>Schema do projeto</summary>
@@ -129,7 +131,7 @@ Para utilizar o TypeORM é necessário também o driver do banco para qual irá 
 - reflect-metadata
 - sqlite3
 
-## TypeORM
+### TypeORM
 
 No TypeORM existem varias maneiras para definir suas propriedades de acordo com a documentação, mas no projeto iremos utilizar por JSON, na raiz do projeto iremos criar o **ormconfig.json**
 
@@ -378,3 +380,118 @@ router.post("/router", exampleMiddleware, exampleMiddleware2, exampleController)
 
 </details>
 
+<details>
+
+<summary>Dia 4 - Landing</summary>
+
+## Aula 4 - Trabalhando com websockets
+
+### JWT - Json Web Tocken
+
+Através do JWT, ele distribui esse token para poder manter autenticação do usuário e pode atuar
+
+Como funciona o token? É divído em 3 partes
+
+- Header: tipo de Token e o algoritmo de criptografia
+- Payload: São informações que precisamos passar de dentro do token, por exemplo, id, email, nome do usuario, tempo de expiração
+- Verificação de assinatura: Ele ira concatenar o header e o payload alem da chave secreta do JWT que é criado nossa chave de API
+
+> JAMAIS, coloque a senha do usuário no token, por mais que seja seguro, ou não manipulavel, se houver dados sensíveis é possível descriptografar
+
+Iremos utilizar a biblioteca do jsonwebtoken e suas tipagems @jsonwebtocken como dependencia de desenvolvimento
+
+
+Para criar nosso token, temos que garantir que é um usuário que exista na banco de dados e seus dados que estão enviando se são corretos
+### Hash de senhas
+
+No projeto iremos agora adicionar uma migration contendo uma coluna de senha na tabela de users
+
+- yarn typeorm migration:create -n AlterUserAddPassword
+
+E adicionar uma coluna do type varchar com o nome de password, alem adicionar na entidade de User, no controller e no service
+
+No momento a aplicação esta salvando a senha em texto plano e isso é **PÉSSIMA PRÁTICA DE SEGURANÇA**, pois você pode deixar seus usuarios daquele sistema totalmente vulneraveis, alem da quebra de privacidade.
+
+Iremos instalar a biblioteca do bcryptjs para conseguir, além da suas tipagens
+
+- yarn add bcryptjs
+- yarn add @types/bcryptjs
+
+Dentro do CreateUserService, iremos importar o hash da biblioteca do bcryptjs e criar uma criptografia para o password ser convertido no hash desejado
+
+Antes do chamar o repositório para criar o usuário, iremos definir uma const, chamando a função do hash, os dois paramêtros que ele recebe a primeira é a senha e o segundo é o salt, que é tipo de criptografia, ou seja, o tamanho da criptografia para o seu salto, um padrão a ser utilizado é o tamanho 8, e é uma promise definindo um await nele, como o create do repositório é os dados que serão enviados para o banco, temos que alterar para o campo password receber a nossa password com hash, definindo pelo nome do campo e o valor que vai ser atribuido
+```js
+const passwordHash = await hash(password, 8) // Criado hash da senha com salt 8
+
+const user = usersRepository.create({
+    name,
+    email,
+    admin,
+    password: passwordHash // Valor alterado
+});
+await usersRepository.save(user);
+return user;
+```
+
+### Autenticação do usuário
+
+Iremos criar um service para a autenticação do usuário, com o nome AuthenticateUserService.ts
+
+A classe de autenticação ira esperar para receber o email e password, e iremos criar uma interface esperando esses dois paramêtros como string
+
+Na classe de execute temos duas tratativas:
+
+- Verificar se email existe;
+- Verificar se a senha está correta
+
+Na trativa de se o usuário existe, iremos usar do userRepositorie para verificar se o email ja existe no banco com o findOne
+
+> Quando passa uma informação de retorno com dados sensíveis, por questões de segurança da aplicação, nós precisamos deixar a mensagem de erro mais genérica, afim de deixar aplicação mais segura para evitar de brute Forces
+
+Para verificar a senha usaremos outro método do bcryptjs que é o compare, para permitir comparar duas senhas, pois quando você a informação do usuário para a validação, o usuário irá enviar uma senha com texto plano, e a função compare permite converter esse texto do usuário para um hash, com a intenção de comparar o hash que está no banco de dados para permitir o usuário logar
+Essa função esta comparando a informação do user com a do banco de dados, e ele retorna como booleano
+- True : Senha Correta
+- False: Senha Incorreta
+```js
+const passwordMatch = await compare(password, user.password);
+```
+
+E por fim se tudo estiver certo, iremos gerar o token para o usuário, mas primeiro precisamos importa do jsonwebtocken, importa o sign que vai ser gerado o token, e depois criar uma const de token com a função do sign, passando o payload e o secret do jsonwebtoken, e também temos a opção de definir algumas opções para o nosso token, como um subject, , por exemplo qual informação que passar, por exemplo, o id do usuário, e também um tempo de expiração.
+
+```js
+const token = sign({
+    exma: user.email
+}, "json-secret-aqui" , {
+    subject: user.id,
+    expiresIn: "1d",
+});
+return token;
+```
+
+Para um cenário ideal um token menor de 15 minutos e utilizar um refreshToken com tempo de expiração maior e quando esse token expirar, em vez do cliente inserir novamente o email e a senha dele, a aplicação (front-end) ele vai armazenar esse refreshToken e cada x tempo que esse token expirar, ele vai auto-gerar um novo token com base no refreshToken
+
+> Para utilização de jsonwebsecret, podemos usar o generator de md5 para maior segurança da nossa aplicação
+> Colocar no projeto depois varíaveis de ambiente para uma milha extra
+
+Iremos agora criar um controller para fazer o handle do nosso request de email e password, primeiramente criando a classe, recebendo o token e passando o email e  a senha, e se tudo der certo é retornado um response.json contendo o token.
+```js
+    async handle(request: Request, response: Response){
+        const {email, password} = request.body
+
+        const authenticateUserService = new AuthenticateUserService();
+
+        const token = await authenticateUserService.execute({
+            email,
+            password
+        });
+
+        return response.json(token);
+```
+
+Agora iremos adicionar esse controller em nossas rotas, declarar um novo objeto do AuthenticateUserController, e definir uma rota post para a rota que você quiser, no projeto iremos utilizar o login.
+
+Crie uma rota no postman com a rota colocada e teste enviando um body JSON com email e password cadastrado do banco!
+
+> Você pode verificar o token de que veio da rota no site do [!JWT]https://jwt.io, mostrando no token algumas propriedades como o email, tempo de criação e expiração 
+
+</details>
