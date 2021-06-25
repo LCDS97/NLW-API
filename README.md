@@ -373,7 +373,7 @@ router.post("/router", exampleMiddleware, exampleMiddleware2, exampleController)
 
 <summary>Dia 4 - Landing</summary>
 
-## Aula 4 - Trabalhando com websockets
+## Aula 4 - Trabalhando com JWT
 
 ### JWT - Json Web Tocken
 
@@ -649,3 +649,67 @@ async execute({nome, email, admin = false, password})...
 
 
 </details>
+<details>
+
+<summary>Dia 5 - Surface Exploration</summary>
+
+## Aula 5 - Finalizando o projeto
+
+### Middleware de autenticação
+
+Iremos criar o middleware de autenticação, na pasta de middlewares como ensureAuthenticate
+
+A função do middleware vai ser da seguinte forma:
+- Receber o token;
+- Validar se token está preenchido;
+- Validar se token é válido
+- Recuperar informações do usuário
+
+A estratégia que iremos adotar é o bearer Token, aplicando o token no req.headers.authorization, agora que precisamos fazer como ja sabemos a estrutura do token e validar ele, fazendo um split do js para comparar se o token é um token valido do JWT
+
+Primeiros iremos tratar se ele estiver preenchido ou não, caso não esteja preenchido, ira replicar um response.status(401), como unathorized, iremos importar a função verify da biblioteca do JWT para verificar se o token é valido, recortando o bearer com o split, para conseguimos autenticar o usuário colocaremos essa função dentro de um try e catch
+```js
+const [, token] = authToken.split(' ');
+
+try{
+    const decode = verify(token, "jwt-secret-aqui");
+    return next()
+} catch (err) {
+    return response.status(401).end();
+}
+```
+
+Agora que concluimos nesse momento para o usuário é autenticado, mas se for para recuperar informações de usuarios mas o que é legal que conseguimos manipular o nosso request para resgatar algumas informações, como ele resgata o id do usuário, nós podemos colocar o id do nosso usuário logado, porque pode ser que algumas rotas vão precisar do id do usuario, com o subject
+
+No typescript conseguimos sobresrever alguns tipos de bibliotecas que ja possuem suas tipagens, para isso dentro da pasta src, iremos criar uma pasta @types, dentro dela iremos criar uma outra pasta express, e dentro dessa pasta, ira ter um arquivo index.d.ts
+e aplicar isso dentro dele:, para conseguimos utilizar o request.user_id para resgatar algumas informações do usuário
+```js
+declare namespace Express {
+    export interface Request {
+        user_id: string;
+    }
+}
+```
+
+Mas ainda esta dando erro pois o request.user_id ainda espera receber uma string, pois o sub do token não é o valor que o mesmo deseja, no typescript iremos utilzar o interface para converter o sub para string e forçar no verify seja como interface IPayload
+```js
+interface IPayload{
+    sub: string;
+}
+
+    try {
+        const { sub } = verify(token, "3f5d78c9055fcfb1d20630f3fc08e28a") as IPayload
+        request.user_id = sub
+    } catch (error) {
+        return response.status(401).end()
+    }
+```
+
+É necessário também definir no tsconfig.json no typeRoots para declarar aonde esta as tipagens personalizadas
+```js
+"typeRoots": ["./src/@types"],...
+```
+Iremos recuperar a informação do id do admin, colocando dentro do ensureAdmin a destruturação do user_id e verificamos que no console ele ja mostra o id do usuario depois que acessar o middleware de admin
+
+</details>
+
