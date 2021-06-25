@@ -8,7 +8,24 @@
 > Projeto da semana Next Level Week
 ## :file_folder: Estrutura do Projeto
 <pre>
-<p> Futuramente colocarei a estrutura do projeto aqui
+├──USER                                     ├──Tag       
+├ ├──(PK) ID (uuid)                         ├ ├──(PK) ID (uuid)
+├  ├──name (varchar)                        ├  ├──name (varchar)
+├  ├──name (varchar)                        ├  ├──created_at (Date)
+├  ├──name (varchar)                        ├  ├──updated_at (Date)
+├  ├──email (varchar)                       ⬇ 
+├  ├──password (varchar)                    ⬇ 
+├  ├──admin (boolean)                       ⬇ 
+├  ├──created_at (Date)                     ⬇
+├  ├──updated_at (Date)                         ├──Compliments
+⬇                                               ├ ├──(PK) ID (uuid)
+⬇                                               ├  ├──(FK) user_sender (uuid)  
+➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡        ├  ├──(FK) user_receiver (uuid)
+                                                ├  ├──(FK) tag_id (uuid)
+                                                ├  ├──created_at (Date)
+
+
+
 </pre>
 ## Sobre o projeto
 
@@ -73,36 +90,8 @@ Também utilizando o beekeeper studio para o SQL
 <summary>Dia 2 - Maximum Speed</summary>
 
 ## Aula 2 - TypeORM
-> Banco de Dados
 
-<details>
-
-<summary>Schema do projeto</summary>
-<pre>
-├──USER                                     ├──Tag       
-├ ├──(PK) ID (uuid)                         ├ ├──(PK) ID (uuid)
-├  ├──name (varchar)                        ├  ├──name (varchar)
-├  ├──name (varchar)                        ├  ├──created_at (Date)
-├  ├──name (varchar)                        ├  ├──updated_at (Date)
-├  ├──email (varchar)                       ⬇ 
-├  ├──password (varchar)                    ⬇ 
-├  ├──admin (boolean)                       ⬇ 
-├  ├──created_at (Date)                     ⬇
-├  ├──updated_at (Date)                         ├──Compliments
-⬇                                               ├ ├──(PK) ID (uuid)
-⬇                                               ├  ├──(FK) user_sender (uuid)  
-➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡        ├  ├──(FK) user_receiver (uuid)
-                                                ├  ├──(FK) tag_id (uuid)
-                                                ├  ├──created_at (Date)
-
-
-
-</pre>
-
-
-</details>
-
-> Tipos de parâmetros
+### Tipos de parâmetros
 <pre>
 * Routes Params => http://localhost:3000/produtos/(params)
 - O route params serve para definir para acessar um parametro para a rota, por exemplo para acessar um id de um produto, ou seja o id é o paramêtro nesse caso
@@ -492,6 +481,14 @@ Agora iremos adicionar esse controller em nossas rotas, declarar um novo objeto 
 
 Crie uma rota no postman com a rota colocada e teste enviando um body JSON com email e password cadastrado do banco!
 
-> Você pode verificar o token de que veio da rota no site do [!JWT]https://jwt.io, mostrando no token algumas propriedades como o email, tempo de criação e expiração 
+> Você pode verificar o token de que veio da rota no site do https://jwt.io, mostrando no token algumas propriedades como o email, tempo de criação e expiração 
+
+### Criando a tabela de Compliments
+
+Agora iremos criar a migration da Compliments
+```js
+yarn typeorm migration:create -n CreateCompliments 
+```
+
 
 </details>
