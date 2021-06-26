@@ -14,7 +14,7 @@ export class CreateCompliments1624581488444 implements MigrationInterface {
                     },
                     {
                         name: "user_sender",
-                        type: "uuid",
+                        type: "uuid"
                     },
                     {
                         name: "user_receiver",
@@ -40,7 +40,7 @@ export class CreateCompliments1624581488444 implements MigrationInterface {
                         referencedTableName: "users",
                         referencedColumnNames: ["id"],
                         columnNames:["user_sender"],
-                        onDelete: "SET NULL",
+                        onDelete: "CASCADE",
                         onUpdate: "SET NULL"
                     },
                     {
@@ -48,7 +48,7 @@ export class CreateCompliments1624581488444 implements MigrationInterface {
                         referencedTableName: "users",
                         referencedColumnNames: ["id"],
                         columnNames:["user_sender"],
-                        onDelete: "SET NULL",
+                        onDelete: "CASCADE",
                         onUpdate: "SET NULL"
                     },
                     {
@@ -56,7 +56,7 @@ export class CreateCompliments1624581488444 implements MigrationInterface {
                         referencedTableName: "tags",
                         referencedColumnNames: ["id"],
                         columnNames:["tag_id"],
-                        onDelete: "SET NULL",
+                        onDelete: "CASCADE",
                         onUpdate: "SET NULL"
                     }
                 ]
