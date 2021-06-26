@@ -28,6 +28,34 @@ details# NLW-API
 
 </pre>
 ## Sobre o projeto
+
+### Principais conceitos aprendido no projeto
+
+#### Introdução
+- O que é node.js, e toda a seu funcionamento de como o Node.js funciona;
+- Conceito de API
+- Tipos de métodos, paramêtros
+- Rotas
+
+#### TypeORM
+- Migrations
+- Entidades
+- Repositórios
+- Services
+- Relacionamentos de tabelas
+- ORM
+- Relacionamentos entre entidades;
+#### Autenticação
+- Middlewares;
+- JWT
+- Garantia de autenticação na aplicação e tratativas de erro
+#### Clean Code
+- Camadas de aplicação;
+- Conceito de clean code - divindindo responsabilidades da aplicação;
+- Tipagens com typescript
+
+
+
 ### Regras de Negócios
 
 <details>
@@ -44,9 +72,9 @@ details# NLW-API
 - [x] Não é permitido cadastrar por usuários que não sejam administradores
 
 - Cadastro de elogios
-- [ ] Não é permitido um usuário cadastrar um elogio para si
-- [ ] Não é permitido cadastrar elogios para usuários invalidos
-- [ ] O usuário precisa estar autenticado na aplicação
+- [x] Não é permitido um usuário cadastrar um elogio para si
+- [x] Não é permitido cadastrar elogios para usuários invalidos
+- [x] O usuário precisa estar autenticado na aplicação
 </details>
 
 <hr>
@@ -991,6 +1019,8 @@ class ListUsersService {
     }
 }
 ```
+
+Project Done #NeverStopLearning 💪💪💪
 
 </details>
 
