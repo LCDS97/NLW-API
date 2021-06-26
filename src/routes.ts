@@ -11,6 +11,8 @@ import { ListTagsController } from "./controllers/ListTagsController";
 import { ListUsersController } from "./controllers/ListUsersController";
 import { CreateTeamController } from "./controllers/CreateTeamController";
 import { ListTeamsController } from "./controllers/ListTeamsController";
+import { CreateNoteTeamController} from "./controllers/CreateNoteTeamController";
+
 
 const router = Router();
 
@@ -20,12 +22,14 @@ const authenticateUserController = new AuthenticateUserController();
 const createTagController = new CreateTagController();
 const createTeamController = new CreateTeamController();
 const createComplimentController = new CreateComplimentController();
+const createNoteTeamController = new CreateNoteTeamController();
 
 const listUserSendComplimentsController = new ListUserSendComplimentsController();
 const listUserReceiveComplimentsController = new ListUserReceiveComplimentsController();
 const listTagsController = new ListTagsController();
 const listUsersController = new ListUsersController();
 const listTeamsController = new ListTeamsController();
+
 
 
 // Login e Create
@@ -38,11 +42,13 @@ router.post("/teams", ensureAuthenticated, ensureAdmin, createTeamController.han
 
 // App routes
 router.post("/compliments", ensureAuthenticated, createComplimentController.handle);
+router.post("/teamsNote", ensureAuthenticated, createNoteTeamController.handle);
 
 router.get("/users", ensureAuthenticated, listUsersController.handle)
 router.get("/users/compliments/send", ensureAuthenticated,listUserSendComplimentsController.handle)
 router.get("/users/compliments/receive", ensureAuthenticated,listUserReceiveComplimentsController.handle)
 router.get("/tags", ensureAuthenticated, listTagsController.handle);
 router.get("/teams", ensureAuthenticated, listTeamsController.handle);
+
 
 export { router }

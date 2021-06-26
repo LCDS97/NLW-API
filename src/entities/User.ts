@@ -1,6 +1,7 @@
-import {Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn} from "typeorm";
+import {Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, JoinColumn, OneToOne} from "typeorm";
 import { v4 as uuid } from "uuid"
 
+import { Team } from "./Team";
 import {Exclude} from "class-transformer";
 
 @Entity("users")
@@ -27,6 +28,8 @@ class User {
 
     @UpdateDateColumn()
     updated_at: Date;
+
+    
 
     constructor(){
         if(!this.id){
