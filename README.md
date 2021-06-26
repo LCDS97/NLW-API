@@ -906,7 +906,91 @@ Caso a gente queira fazer uma costumização para personalizar as tags como inse
         return tags;
 ```
 
-Mas também existe uma biblioteca que tem a principal funcionalidade de personalizar entities da nossa aplicação, porque o RM
+Mas também existe uma biblioteca que tem a principal funcionalidade de personalizar entities da nossa aplicação, porque o TypeORM ele vai fazer toda a busca e só depois que a gente consegue manipular isso com informações que não estão no banco de dados, mas iremos utilizar Class Transform.
+
+### Class Transform
+
+O próprio nome ja diz, ela transforma uma classe, e então conseguimos passar algumas informações da nossa classe, e essa biblioteca tem um método chamado expose() que são atributos que ainda não foram lidos no typeORM, e iremos importar ele no nosso projeto
+
+- yarn add class-transformer
+
+E dentro da entidade Tag:
+iremos importar de dentro do class-transformer o expose() e depois, iremos referenciar na classe Tag o Expose com o um name paraEle, e importamos uma função que é do tipo String, e dentro dele retornamos o valor do name com a hashtag no inicio
+```js
+import { Expose } from "class-transformer";
+
+    @Expose({name: "nameCustom"})
+    nameCustom(): string {
+        return `#${this.name}`
+    }
+```
+
+e dentro do Service do ListTagsService.ts, iremos importar do class-transformer o classToPlain que é o valor que ira retornar no class-transformer do entities Tag que seja no caso, o retorno da const do tags do .find do tagRepositories, ele vai criar novos objetos a partir do TypeORM e também vai adicionar o objeto do TypeORM
+
+```js
+import { Expose } from "class-transformer";
+
+class ListTagsService {
+    async execute(){
+        const tagsRepositories = getCustomRepository(TagsRepositories);
+
+        const tags = await tagsRepositories.find();
+
+        return classToPlain(tags);
+
+    }
+}
+```
+
+A propriedade classToPlain ela basicamente vai dentro da entidade de Tag, e ela vai criar novos objetos que a partir do objeto que vão vir da const tags do TypeORM, e quando ela criar esses novos objetos, ela também vai adicionar o objeto do nameCustom
+
+### List Users
+E para finalizar a aplicação, iremos fazer um list de todos os usuários
+Criaremos o service de ListUsersService.ts, com um async execute(), importando o userRepositories, chamando o método find, para retornar os users
+```js
+class ListUsersService {
+    async execute(){
+        const usersRepositories = getCustomRepository(UsersRepositories);
+
+        const users = await usersRepositories.find();
+
+        return users;
+
+    }
+}
+```
+
+E depois criar um controller para manipular seu handle
+
+
+E por ultimo criar uma rota, para acessar método Get, no meu projeto esse método só vai ser permitido por Admin
+
+Para não reverlamos as senhas dos usuários utilizaremos o modo exclude() do class-transform
+No entitites de User.ts, utilizaremos o método @Exclude importando do proprio class-transform
+```js
+import {Exclude} from "class-transformer";
+
+    @Exclude()
+    @Column()
+    password: string;
+```
+
+Após isso importaremos o classToPlain novamente para criar o novo objeto do class-transform a partir do objeto Entitie password;
+
+```js
+import {classToPlain} from "class-transformer";
+
+class ListUsersService {
+    async execute(){
+        const usersRepositories = getCustomRepository(UsersRepositories);
+
+        const users = await usersRepositories.find();
+
+        return classToPlain(users);
+
+    }
+}
+```
 
 </details>
 
