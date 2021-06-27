@@ -88,7 +88,7 @@ Projeto de back-end na linguagem Node.js para criação de elogios para usuário
 ##### GET
 - /user/compliments/send: Busca todos os elogios enviados
 - /user/compliments/receive: Busca todos os elogios recebidos
-- /user/notes/send": Busca todos as anotações enviadas
+- /user/notes/send: Busca todos as anotações enviadas
 - /user/notes/receive: Busca todas as anotações recebidas
 
 </details>
