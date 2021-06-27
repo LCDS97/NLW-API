@@ -7,7 +7,7 @@
 
 # NLW VALORIZA
 > Projeto da semana Next Level Week
-Projeto de back-end na linguagem Node.js para criação de elogios para usuários e anotações para seus times, que são representados
+Projeto de back-end na linguagem Node.js para criação de elogios para usuários e anotações para seus times, que são representados por suas linguagens de programação!
 ## :file_folder: Estrutura do Projeto
 <pre>
 ├──USER                                     ├──Tag                             ├──Team  
