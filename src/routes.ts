@@ -11,8 +11,10 @@ import { ListTagsController } from "./controllers/ListTagsController";
 import { ListUsersController } from "./controllers/ListUsersController";
 import { CreateTeamController } from "./controllers/CreateTeamController";
 import { ListTeamsController } from "./controllers/ListTeamsController";
-import { CreateNoteTeamController} from "./controllers/CreateNoteTeamController";
-
+import { CreateNoteTeamController } from "./controllers/CreateNoteTeamController";
+import { ListNotesController } from "./controllers/ListNotesController";
+import { ListUserSendNotesController} from "./controllers/ListUserSendNotesController";
+import { ListUserReceiveNotesController } from "./controllers/ListUserReceiveNotesController";
 
 const router = Router();
 
@@ -24,11 +26,16 @@ const createTeamController = new CreateTeamController();
 const createComplimentController = new CreateComplimentController();
 const createNoteTeamController = new CreateNoteTeamController();
 
-const listUserSendComplimentsController = new ListUserSendComplimentsController();
-const listUserReceiveComplimentsController = new ListUserReceiveComplimentsController();
 const listTagsController = new ListTagsController();
 const listUsersController = new ListUsersController();
 const listTeamsController = new ListTeamsController();
+const listNotesController = new ListNotesController();
+
+const listUserSendComplimentsController = new ListUserSendComplimentsController();
+const listUserReceiveComplimentsController = new ListUserReceiveComplimentsController();
+const lisUserSendNotesController = new ListUserSendNotesController();
+const listUserReceiveNotesController = new ListUserReceiveNotesController();
+
 
 
 
@@ -42,13 +49,20 @@ router.post("/teams", ensureAuthenticated, ensureAdmin, createTeamController.han
 
 // App routes
 router.post("/compliments", ensureAuthenticated, createComplimentController.handle);
-router.post("/teamsNote", ensureAuthenticated, createNoteTeamController.handle);
+router.post("/notes", ensureAuthenticated, createNoteTeamController.handle);
 
+// Search All
 router.get("/users", ensureAuthenticated, listUsersController.handle)
-router.get("/users/compliments/send", ensureAuthenticated,listUserSendComplimentsController.handle)
-router.get("/users/compliments/receive", ensureAuthenticated,listUserReceiveComplimentsController.handle)
 router.get("/tags", ensureAuthenticated, listTagsController.handle);
 router.get("/teams", ensureAuthenticated, listTeamsController.handle);
+router.get("/notes", ensureAuthenticated, listNotesController.handle);
+
+// Search User
+router.get("/user/compliments/send", ensureAuthenticated,listUserSendComplimentsController.handle)
+router.get("/user/compliments/receive", ensureAuthenticated,listUserReceiveComplimentsController.handle)
+router.get("/user/notes/send", ensureAuthenticated, lisUserSendNotesController.handle)
+router.get("/user/notes/receive", ensureAuthenticated, listUserReceiveNotesController.handle)
+
 
 
 export { router }

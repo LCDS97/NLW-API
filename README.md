@@ -6,28 +6,29 @@
 
 # NLW VALORIZA
 > Projeto da semana Next Level Week
+Projeto de back-end na linguagem Node.js para criação de elogios para usuários e anotações para seus times, que são representados
 ## :file_folder: Estrutura do Projeto
 <pre>
-├──USER                                     ├──Tag       
-├ ├──(PK) ID (uuid)                         ├ ├──(PK) ID (uuid)
-├  ├──name (varchar)                        ├  ├──name (varchar)
-├  ├──name (varchar)                        ├  ├──created_at (Date)
-├  ├──name (varchar)                        ├  ├──updated_at (Date)
+├──USER                                     ├──Tag                             ├──Team  
+├ ├──(PK) ID (uuid)                         ├ ├──(PK) ID (uuid)                ├ ├──(PK) ID (uuid)
+├  ├──name (varchar)                        ├  ├──name (varchar)               ├  ├──name (varchar)
+├  ├──name (varchar)                        ├  ├──created_at (Date)            ├  ├──created_at (Date)
+├  ├──name (varchar)                        ├  ├──updated_at (Date)            ├  ├──updated_at (Date)
 ├  ├──email (varchar)                       ⬇ 
 ├  ├──password (varchar)                    ⬇ 
 ├  ├──admin (boolean)                       ⬇ 
 ├  ├──created_at (Date)                     ⬇
-├  ├──updated_at (Date)                         ├──Compliments
-⬇                                               ├ ├──(PK) ID (uuid)
-⬇                                               ├  ├──(FK) user_sender (uuid)  
-➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡        ├  ├──(FK) user_receiver (uuid)
-                                                ├  ├──(FK) tag_id (uuid)
-                                                ├  ├──created_at (Date)
-
+├  ├──updated_at (Date)                         ├──Compliments                      ├──Notes
+⬇                                               ├ ├──(PK) ID (uuid)                 ├ ├──(PK) ID (uuid)
+⬇                                               ├  ├──(FK) user_sender (uuid)       ├  ├──(FK) user_name (uuid) 
+➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡➡        ├  ├──(FK) user_receiver (uuid)     ├  ├──(FK) user_target (uuid) 
+                                                ├  ├──(FK) tag_id (uuid)            ├  ├──(FK) team_id (uuid)
+                                                ├  ├──created_at (Date)             ├  ├──created_at (Date)
 
 
 </pre>
-## Sobre o projeto
+<hr>
+<h2>:checkered_flag: Sobre o projeto </h2> <a name="about"></a>
 
 ### Principais conceitos aprendido no projeto
 
@@ -54,6 +55,43 @@
 - Conceito de clean code - divindindo responsabilidades da aplicação;
 - Tipagens com typescript
 
+<hr>
+
+### Rotas da Aplicação
+
+<details>
+<summary>Expandir</summary>
+
+### NLW VALORIZA
+
+#### Rotas de Login e Create User
+##### POST
+- /users: Criação de usuário
+- /login: Autenticação de usuário
+
+#### Rotas de Admin
+
+##### POST
+- /tags: Criação de tags
+- /teams: Criação dos times
+
+#### Rotas Gerais
+
+##### GET
+- /users: Busca todos os usuários
+- /tags: Busca todas as tags de elogio
+- /teams: Busca todos os times
+- /notes: Busca todas as anotações
+
+#### Rotas de Envio e Recebido do Usuário Logado
+
+##### GET
+- /user/compliments/send: Busca todos os elogios enviados
+- /user/compliments/receive: Busca todos os elogios recebidos
+- /user/notes/send": Busca todos as anotações enviadas
+- /user/notes/receive: Busca todas as anotações recebidas
+
+</details>
 
 
 ### Regras de Negócios
