@@ -1,4 +1,4 @@
-details# NLW-API
+# NLW-API
 
 ## Sumário:
 - [Sobre](#about)
@@ -60,6 +60,7 @@ details# NLW-API
 
 <details>
 <summary>Expandir</summary>
+
 ### NLW VALORIZA
 
 - Cadastro de usuário
@@ -74,6 +75,11 @@ details# NLW-API
 - Cadastro de elogios
 - [x] Não é permitido um usuário cadastrar um elogio para si
 - [x] Não é permitido cadastrar elogios para usuários invalidos
+- [x] O usuário precisa estar autenticado na aplicação
+
+- Cadastro de notas
+- [x] Não é permitido um usuário cadastrar uma nota para si
+- [x] Não é permitido cadastrar notass para usuários invalidos
 - [x] O usuário precisa estar autenticado na aplicação
 </details>
 
