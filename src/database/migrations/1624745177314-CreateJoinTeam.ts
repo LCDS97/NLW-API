@@ -1,11 +1,11 @@
 import {MigrationInterface, QueryRunner, Table} from "typeorm";
 
-export class CreateCompliments1624581488444 implements MigrationInterface {
+export class CreateJoinTeam1624745177314 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
-                name: "compliments",
+                name: "subscribedTeams",
                 columns: [
                     {
                         name: "id",
@@ -13,15 +13,15 @@ export class CreateCompliments1624581488444 implements MigrationInterface {
                         isPrimary: true
                     },
                     {
-                        name: "user_sender",
+                        name: "user_name",
                         type: "uuid"
                     },
                     {
-                        name: "user_receiver",
+                        name: "user_target",
                         type: "uuid"
                     },
                     {
-                        name: "tag_id",
+                        name: "team_id",
                         type: "uuid"
                     },
                     {
@@ -36,38 +36,36 @@ export class CreateCompliments1624581488444 implements MigrationInterface {
                 ],
                 foreignKeys:[
                     {
-                        name: "FKUserSenderCompliments",
+                        name: "FKUserSubscribedTeam",
                         referencedTableName: "users",
                         referencedColumnNames: ["id"],
-                        columnNames:["user_sender"],
+                        columnNames:["user_name"],
                         onDelete: "CASCADE",
                         onUpdate: "CASCADE"
                     },
                     {
-                        name: "FKUserReceiverCompliments",
+                        name: "FKUserReceiveNote",
                         referencedTableName: "users",
                         referencedColumnNames: ["id"],
-                        columnNames:["user_receiver"],
+                        columnNames:["user_target"],
                         onDelete: "CASCADE",
                         onUpdate: "CASCADE"
                     },
                     {
-                        name: "FKUserTagCompliments",
-                        referencedTableName: "tags",
+                        name: "FKUserTeam",
+                        referencedTableName: "teams",
                         referencedColumnNames: ["id"],
-                        columnNames:["tag_id"],
+                        columnNames:["team_id"],
                         onDelete: "CASCADE",
                         onUpdate: "CASCADE"
                     }
                 ]
             })
         )
-
-
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable("compliments")
+        await queryRunner.dropTable("subscribedTeams")
     }
 
 }

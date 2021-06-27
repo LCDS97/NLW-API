@@ -565,10 +565,10 @@ Foi criado no projeto três FK com os nomes FKUserSenderCompliments e FKUserRece
                         onUpdate: "SET NULL"
                     },
                     {
-                        name: "FKUserSenderCompliments",
+                        name: "FKUserReceiverCompliments",
                         referencedTableName: "users",
                         referencedColumnNames: ["id"],
-                        columnNames:["user_sender"],
+                        columnNames:["user_receiver"],
                         onDelete: "SET NULL",
                         onUpdate: "SET NULL"
                     },
