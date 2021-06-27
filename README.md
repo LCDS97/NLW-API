@@ -2,6 +2,7 @@
 
 ## Sumário:
 - [Sobre](#about)
+- [Rotas e Regras](#routesandrules)
 - [Conceitos](#concepts)
 
 # NLW VALORIZA
@@ -57,7 +58,7 @@ Projeto de back-end na linguagem Node.js para criação de elogios para usuário
 
 <hr>
 
-### Rotas da Aplicação
+<h3>:flags: Rotas da Aplicação </h3> <a name="routesandrules"></a>
 
 <details>
 <summary>Expandir</summary>
@@ -94,7 +95,7 @@ Projeto de back-end na linguagem Node.js para criação de elogios para usuário
 </details>
 
 
-### Regras de Negócios
+<h3>:no_entry_sign: Regras de Negócio </h3> <a name="routesandrules"></a>
 
 <details>
 <summary>Expandir</summary>
